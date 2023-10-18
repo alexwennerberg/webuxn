@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 /*
 Copyright (c) 2021 Devine Lu Linvega
 
@@ -11,41 +9,37 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 WITH REGARD TO THIS SOFTWARE.
 */
 
+/* clang-format off */
+
+#define PEEK2(d) (*(d) << 8 | (d)[1])
+#define POKE2(d, v) { *(d) = (v) >> 8; (d)[1] = (v); }
+
+/* clang-format on */
+
+#define PAGE_PROGRAM 0x0100
+
 typedef unsigned char Uint8;
 typedef signed char Sint8;
 typedef unsigned short Uint16;
 typedef signed short Sint16;
-
-#define PAGE_PROGRAM 0x0100
+typedef unsigned int Uint32;
 
 typedef struct {
-	Uint8 ptr, kptr, error;
-	Uint8 dat[256];
+	Uint8 dat[0x100], ptr;
 } Stack;
 
-typedef struct {
-	Uint16 ptr;
-	Uint8 dat[65536];
-} Memory;
-
-typedef struct Device {
-	struct Uxn *u;
-	Uint8 addr, dat[16], *mem;
-	void (*talk)(struct Device *d, Uint8, Uint8);
-} Device;
-
 typedef struct Uxn {
-	Stack wst, rst, *src, *dst;
-	Memory ram;
-	Device dev[16];
+	Uint8 *ram, dev[0x100];
+	Stack wst, rst;
 } Uxn;
 
-struct Uxn;
+/* required functions */
 
-void mempoke16(Uint8 *m, Uint16 a, Uint16 b);
-Uint16 mempeek16(Uint8 *m, Uint16 a);
+extern Uint8 emu_dei(Uxn *u, Uint8 addr);
+extern void emu_deo(Uxn *u, Uint8 addr);
+extern Uint8 dei_masks[0x100], deo_masks[0x100];
+extern Uint16 dev_vers[0x10], dei_mask[0x10], deo_mask[0x10];
 
-int loaduxn(Uxn *c, char *filepath);
-int bootuxn(Uxn *c);
-int evaluxn(Uxn *u, Uint16 vec);
-Device *portuxn(Uxn *u, Uint8 id, char *name, void (*talkfn)(Device *, Uint8, Uint8));
+/* built-ins */
+
+int uxn_eval(Uxn *u, Uint16 pc);
