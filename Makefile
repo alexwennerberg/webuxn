@@ -9,7 +9,7 @@ SRC_DIRS ?= ./src
 
 RELEASE=1
 ifeq ($(RELEASE),1)
-	OPT_FLAGS = -O2
+	OPT_FLAGS = -O2 -sSTACK_SIZE=5MB
 else
 	OPT_FLAGS = -g4 --source-map-base "http://0.0.0.0:7001/build/" # -s DEMANGLE_SUPPORT=1
 endif
